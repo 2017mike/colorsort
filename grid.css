@@ -1,0 +1,8 @@
+#image-grid {
+  width: 100vw; /* set the grid width to 100% of the viewport width */
+}
+
+#image-grid img {
+  max-width: 100%; /* ensure the images fit within their grid items */
+  height: auto;
+}
