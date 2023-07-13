@@ -6,3 +6,7 @@
   max-width: 100%; /* ensure the images fit within their grid items */
   height: auto;
 }
+
+body {
+  background-color: rgba(3, 3, 3, 0.622);
+}
