@@ -1,64 +1,90 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>colorSort</title>
+  <link rel="stylesheet" href="grid.css">
+
+</head>
 
 <body>
-  <link rel="stylesheet" href="grid.css">
+  <div id="loadingDiv" class="hidden">loading...</div>
   <div id="image-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"></div>
+
+  <form id="mainForm" action="">
+    <textarea id='textarea' type=""></textarea>
+    <br>
+    <button id="submit">submit</button>
+  </form>
 
   <script src="https://unpkg.com/fast-average-color/dist/index.browser.min.js"></script>
   <script src="images.js"></script>
 
   <script>
 
-    const fac = new FastAverageColor();
 
-    // Split the string into an array of URLs
-    const urls = imageUrls.split(',');
+    document.getElementById('mainForm').addEventListener('submit', event => {
+      event.preventDefault()
+      document.getElementById('loadingDiv').classList.remove('hidden')
+      document.getElementById('mainForm').classList.add('hidden')
+      document.getElementById('texarea')
+      const fac = new FastAverageColor();
+      const imageUrls = document.getElementById('textarea').value
+      const urls = imageUrls.split(',');
 
-    const colorPromises = urls.map((url, index) => {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.src = url;
-        img.onload = function () {
-          fac.getColorAsync(img)
-            .then(color => {
-              console.log(color)
-              // calculate luminance from rgba values
-              const luminance = 0.299 * color.value[0] + 0.587 * color.value[1] + 0.114 * color.value[2];
+      const colorPromises = urls.map((url, index) => {
 
-              resolve({
-                url: url,
-                color: luminance, // use calculated luminance
-                imageElement: img,
-                index: index // add original index for troubleshooting
-              });
-            })
-            .catch(reject);
-        };
-        img.onerror = reject;
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.src = url;
+          img.onload = function () {
+            fac.getColorAsync(img)
+              .then(color => {
+                console.log(color)
+                // calculate luminance from rgba values
+                const luminance = 0.299 * color.value[0] + 0.587 * color.value[1] + 0.114 * color.value[2];
+
+                resolve({
+                  url: url,
+                  color: luminance, // use calculated luminance
+                  imageElement: img,
+                  index: index // add original index for troubleshooting
+                });
+              })
+              .catch(reject);
+          };
+          img.onerror = reject;
+        });
       });
-    });
 
-    Promise.all(colorPromises)
-      .then(results => {
-        results.sort((a, b) => {
-          // sort the results by color luminance
-          return a.color - b.color;
-        });
+      Promise.all(colorPromises)
+        .then(results => {
+          document.getElementById('loadingDiv').classList.add('hidden')
+          results.sort((a, b) => {
+            // sort the results by color luminance
+            return a.color - b.color;
+          });
 
-        // for troubleshooting, log the sorted results
-        console.log(results);
+          // for troubleshooting, log the sorted results
+          console.log(results);
 
-        // now 'results' contains your sorted images
-        // append them to the image grid
-        const imageGrid = document.getElementById('image-grid');
-        results.forEach(result => {
-          const img = document.createElement('img');
-          img.src = result.url;
-          imageGrid.appendChild(img);
-        });
-      })
-      .catch(console.error);
+          // now 'results' contains your sorted images
+          // append them to the image grid
+          const imageGrid = document.getElementById('image-grid');
+          results.forEach(result => {
+            const img = document.createElement('img');
+            img.src = result.url;
+            imageGrid.appendChild(img);
+          });
+        })
+        .catch(console.error);
+    })
+
+
   </script>
 </body>
 
